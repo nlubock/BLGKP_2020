@@ -11,32 +11,34 @@ RUNS := 200402_NB552046_0038_AHLHM2BGXF
 #===============================================================================
 # RECIPIES
 
-all: starcode kb
+all: starcode
 starcode: $(addprefix pipeline/, $(addsuffix /starcode.csv, $(RUNS)))
-kb: $(addprefix pipeline/, $(addsuffix /kb.tsv, $(RUNS)))
 
 # cleanup
 clean:
-	rm -rf pipeline/* ../data/expected-amplicons.idx
+	rm -rf pipeline/* ../data/expected-amplicons.idx ../data/seq-runs/200402_NB552046_0038_AHLHM2BGXF*
 
-.PRECIOUS: $(addprefix pipeline/, %/conditions.csv %/starcode.csv %/output.bus %/kb.tsv)
+.PRECIOUS: $(addprefix pipeline/, %/conditions.csv %/starcode.csv))
 .SECONDARY:
 
 #===============================================================================
 # GET DATA!
 
-../data/seq-runs/200402_NB552046_0038_AHLHM2BGXF:
+../data/seq-runs/200402_NB552046_0038_AHLHM2BGXF.tar.gz:
 	@mkdir -p $(@D)
 	@wget --save-cookies cookies.txt \
 	    'https://docs.google.com/uc?export=download&id=1GVhErh_LZm2R9m7LOCJouI7pN2bHhE4s'\
 	    -O - \
-         | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1/p' \
-	 > confirm.txt \
-	 && wget --load-cookies cookies.txt \
-	 -O $@.tar.gz \
-	 'https://docs.google.com/uc?export=download&id=1GVhErh_LZm2R9m7LOCJouI7pN2bHhE4s&confirm='$$(<confirm.txt) \
-	 && tar -I pigz -xf $@.tar.gz -C $@ \
-	 && rm cookies.txt confirm.txt
+	    | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1/p' \
+	    > confirm.txt \
+	    && wget --load-cookies cookies.txt \
+	    -O $@ \
+	    'https://docs.google.com/uc?export=download&id=1GVhErh_LZm2R9m7LOCJouI7pN2bHhE4s&confirm='$$(<confirm.txt) \
+	    && rm cookies.txt confirm.txt
+
+../data/seq-runs/200402_NB552046_0038_AHLHM2BGXF: ../data/seq-runs/200402_NB552046_0038_AHLHM2BGXF.tar.gz
+	@echo "Decompressing $<"
+	@tar --touch -I pigz -xf $< -C $(@D)
 
 #===============================================================================
 # STARCODE PIPELINE
